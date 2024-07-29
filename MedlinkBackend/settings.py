@@ -11,6 +11,20 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+# =============
+import os
+import environ
+
+# Initialize environment variables
+env = environ.Env()
+environ.Env.read_env()  # Reading .env file
+
+# Encryption key from environment
+ENCRYPTION_KEY = env('ENCRYPTION_KEY')
+
+# Ensure you add other settings like DATABASES, INSTALLED_APPS, etc.
+
+# ==================
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,6 +44,7 @@ ALLOWED_HOSTS = []
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
+    'https://192.168.43.153:3000',
 ]
 # Application definition
 
@@ -43,9 +58,41 @@ INSTALLED_APPS = [
     'patients',
     'rest_framework',
     'corsheaders',
+        'authentication',
+
+]
+AUTH_USER_MODEL = 'authentication.User'
+# settings.py
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+}
+
 MIDDLEWARE = [
+        'patients.middleware.DisableCSRF', 
     'corsheaders.middleware.CorsMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -86,7 +133,7 @@ DATABASES = {
         'NAME': 'medlink',
         'USER': 'root',
         'PASSWORD': '',
-        'HOST': 'localhost',  # Or your MySQL host
+        'HOST': 'localhost', 
         'PORT': '3306',
     }
 }
