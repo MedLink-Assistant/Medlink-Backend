@@ -61,7 +61,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
         'authentication',
-        'clinician',
         'allauth',
 
 ]
