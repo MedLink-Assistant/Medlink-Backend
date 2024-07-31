@@ -29,7 +29,9 @@ ENCRYPTION_KEY = env('ENCRYPTION_KEY')
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+import os
 
+RESEND_API_KEY = os.getenv('RESEND_API_KEY')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -59,10 +61,20 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
         'authentication',
+        'clinician',
+        'allauth',
 
 ]
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'gilbertketer759@gmail.com'
+EMAIL_HOST_PASSWORD = 'ajcwshscwewmalbo'
+DEFAULT_FROM_EMAIL = 'gilbertketer759@gmail.com'
+
 AUTH_USER_MODEL = 'authentication.User'
-# settings.py
+
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]

@@ -3,6 +3,10 @@ from cryptography.fernet import Fernet
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+
+
 # Initialize the cipher suite with the encryption key from settings
 cipher_suite = Fernet(settings.ENCRYPTION_KEY)
 
@@ -31,16 +35,20 @@ class User(AbstractBaseUser):
     
     USERNAME_FIELD = 'email'
     
-    def generate_otp_secret(self):
-        self.otp_secret = Fernet.generate_key().decode()
+    def generate_and_store_otp_code(self):
+        import random
+        otp_code = str(random.randint(100000, 999999))  # Generate a 6-digit OTP code
+        self.otp_code = otp_code
         self.save()
-    
+
     def verify_otp(self, otp):
-        if not self.otp_secret:
-            return False
-        totp = pyotp.TOTP(self.otp_secret)
-        return totp.verify(otp)
-    
+        if self.otp_code == otp:
+            self.otp_code = None
+            self.save()
+            return True
+        return False
+
+
     def set_password(self, raw_password):
         self.password = cipher_suite.encrypt(raw_password.encode()).decode()
         self.save()

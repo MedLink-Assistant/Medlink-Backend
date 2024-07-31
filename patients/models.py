@@ -5,7 +5,7 @@ from django.core.validators import RegexValidator, EmailValidator
 from cryptography.fernet import Fernet
 import base64
 from django.conf import settings
-
+import pyotp
 # Retrieve the encryption key from environment variables
 key = settings.ENCRYPTION_KEY.encode()  # Ensure it's in bytes format
 cipher_suite = Fernet(key)
@@ -51,6 +51,22 @@ class Patient(AbstractBaseUser):
     consent_to_treat = models.BooleanField(default=False)
     privacy_policy = models.BooleanField(default=False)
     enable_2fa = models.BooleanField(default=False)
+    otp_code = models.CharField(max_length=6, blank=True, null=True)
+
+    def generate_and_store_otp_code(self):
+        import random
+        otp_code = str(random.randint(100000, 999999))  # Generate a 6-digit OTP code
+        self.otp_code = otp_code
+        self.save()
+
+    def verify_otp(self, otp):
+        if self.otp_code == otp:
+            self.otp_code = None
+            self.save()
+            return True
+        return False
+
+    
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name', 'date_of_birth', 'gender', 'phone_number', 'address']
