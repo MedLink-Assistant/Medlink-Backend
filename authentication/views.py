@@ -73,8 +73,7 @@ def password_reset_request(request):
         data = json.loads(request.body)
         email = data.get('email')
         patient = Patient.objects.filter(email=email).first()
-        doctor = Doctor.objects.filter(email=email).first()
-        user = patient or doctor
+        user = patient
         if user:
             token = default_token_generator.make_token(user)
             uid = urlsafe_base64_encode(force_bytes(user.pk))
@@ -107,15 +106,14 @@ def password_reset_confirm(request, uidb64, token):
 
             uid = force_str(urlsafe_base64_decode(uidb64))
             patient = Patient.objects.filter(pk=uid).first()
-            doctor = Doctor.objects.filter(pk=uid).first()
-            user = patient or doctor
+            user = patient
 
             if user and default_token_generator.check_token(user, token):
                 user.set_password(password)
                 user.save()
                 return JsonResponse({'message': 'Password has been reset'})
             return JsonResponse({'error': 'Invalid token'}, status=400)
-        except (TypeError, ValueError, OverflowError, Patient.DoesNotExist, Doctor.DoesNotExist, json.JSONDecodeError):
+        except (TypeError, ValueError, OverflowError, Patient.DoesNotExist):
             return JsonResponse({'error': 'Invalid token or request'}, status=400)
     return HttpResponse(status=405)
 
